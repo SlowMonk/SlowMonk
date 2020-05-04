@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en"><!--
+ __  __                __                                     __
+/\ \/\ \              /\ \             __                    /\ \
+\ \ \_\ \   __  __    \_\ \      __   /\_\      __       ___ \ \ \/'\
+ \ \  _  \ /\ \/\ \   /'_` \   /'__`\ \/\ \   /'__`\    /'___\\ \ , <
+  \ \ \ \ \\ \ \_\ \ /\ \L\ \ /\  __/  \ \ \ /\ \L\.\_ /\ \__/ \ \ \\`\
+   \ \_\ \_\\/`____ \\ \___,_\\ \____\ _\ \ \\ \__/.\_\\ \____\ \ \_\ \_\
+    \/_/\/_/ `/___/> \\/__,_ / \/____//\ \_\ \\/__/\/_/ \/____/  \/_/\/_/
+                /\___/                \ \____/
+                \/__/                  \/___/
+
+Powered by Hydejack v6.4.0 (https://qwtel.com/hydejack/)
+-->
+
+
+
+
+
+
+
+
+
+<head>
+  <!-- =============== -->
+<!-- META            -->
+<!-- =============== -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="format-detection" content="telephone=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="naver-site-verification" content="22c5b4ef3bfda7fc6100671413989219de7a4ac8"/>
+<meta property="og:title" content="추천 시스템 Basics">
+<meta property="og:type" content="article">
+
+
+
+
+
+  <meta property="og:image" content="http://localhost:4003/assets/img/logo.png">
+
+
+<meta property="og:image:width" content="640" />
+<meta property="og:image:height" content="360" />
+
+
+
+  <title>추천 시스템 Basics &middot; Woongwon Lee</title>
+
+
+
+<meta name="description" content="추천 시스템 Basics
+추천 시스템이란
+
+">
+<meta property="og:description" content="추천 시스템 Basics
+추천 시스템이란
+
+">
+
+
+
+<!-- =============== -->
+<!-- LINKS           -->
+<!-- =============== -->
+<link rel="canonical" href="http://localhost:4003/recomm/2019/08/15/recommendation_system_basics/">
+<meta property="og:url" content="http://localhost:4003/recomm/2019/08/15/recommendation_system_basics/">
+
+<link rel="alternate" type="application/atom+xml" title="Woongwon Lee Feed" href="http://localhost:4003/feed.xml">
+
+
+  <link rel="prev" href="http://localhost:4003/recomm/2019/08/15/neural_collaborative_filtering/">
+
+
+
+
+<link rel="apple-touch-icon" href="http://localhost:4003/apple-touch-icon.png">
+<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?">
+<!-- Place favicon.ico in the root directory -->
+
+<!-- =============== -->
+<!-- SCRIPTS         -->
+<!-- =============== -->
+<script>
+  !function(n,e){function t(n,e){n.onload=function(){this.onerror=this.onload=null,e(null,n)},n.onerror=function(){this.onerror=this.onload=null,e(new Error("Failed to load "+this.src),n)}}function o(n,e){n.onreadystatechange=function(){"complete"!=this.readyState&&"loaded"!=this.readyState||(this.onreadystatechange=null,e(null,n))}}n._loaded=!1,n.loadJSDeferred=function(a,d){function r(){n._loaded=!0;var r=e.createElement("script");r.src=a,d&&(("onload"in r?t:o)(r,d),r.onload||t(r,d));var l=e.getElementsByTagName("script")[0];l.parentNode.insertBefore(r,l)}n._loaded?r():n.addEventListener?n.addEventListener("load",r,!1):n.attachEvent?n.attachEvent("onload",r):n.onload=r}}(window,document);
+
+  !function(e){"use strict";var n=function(n,t,o){function i(e){if(a.body)return e();setTimeout(function(){i(e)})}function r(){l.addEventListener&&l.removeEventListener("load",r),l.media=o||"all"}var d,a=e.document,l=a.createElement("link");if(t)d=t;else{var f=(a.body||a.getElementsByTagName("head")[0]).childNodes;d=f[f.length-1]}var s=a.styleSheets;l.rel="stylesheet",l.href=n,l.media="only x",i(function(){d.parentNode.insertBefore(l,t?d:d.nextSibling)});var u=function(e){for(var n=l.href,t=s.length;t--;)if(s[t].href===n)return e();setTimeout(function(){u(e)})};return l.addEventListener&&l.addEventListener("load",r),l.onloadcssdefined=u,u(r),l};"undefined"!=typeof exports?exports.loadCSS=n:e.loadCSS=n}("undefined"!=typeof global?global:this);
+
+  !function(t){if(t.loadCSS){var e=loadCSS.relpreload={};if(e.support=function(){try{return t.document.createElement("link").relList.supports("preload")}catch(t){return!1}},e.poly=function(){for(var e=t.document.getElementsByTagName("link"),r=0;r<e.length;r++){var n=e[r];"preload"===n.rel&&"style"===n.getAttribute("as")&&(t.loadCSS(n.href,n,n.getAttribute("media")),n.rel=null)}},!e.support()){e.poly();var r=t.setInterval(e.poly,300);t.addEventListener&&t.addEventListener("load",function(){e.poly(),t.clearInterval(r)}),t.attachEvent&&t.attachEvent("onload",function(){t.clearInterval(r)})}}}(this);
+
+  window.disablePushState = false;
+  window.disableDrawer = false;
+</script>
+<!--
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-5105555504153863",
+    enable_page_level_ads: true
+  });
+</script>
+-->
+<!--[if lt IE 9]>
+<script src="https://unpkg.com/html5shiv/dist/html5shiv.min.js"></script>
+<![endif]-->
+
+<!-- =============== -->
+<!-- STYLES          -->
+<!-- =============== -->
+<!--[if gt IE 8]><!---->
+<style>
+  
+  article,aside,dialog,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}mark{background:#FF0;color:#000}*{box-sizing:border-box}html,body{margin:0;padding:0}html{font-size:16px;line-height:1.75}body{color:#333;background-color:#fff;overflow-y:scroll}a{text-decoration:none}.lead{margin-left:-1rem;margin-right:-1rem}img,.img{display:block;max-width:100%;margin-bottom:1rem;border:none}img.lead,.img.lead{max-width:calc(100% + 2rem);width:calc(100% + 2rem)}h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6,.heading{font-weight:bold;text-rendering:optimizeLegibility}h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6{margin:1.6rem 0 1rem;line-height:1.6}h1,.h1{font-size:2rem;line-height:1.25}h2,.h2{font-size:1.5rem}h3,.h3{font-size:1.17em}p{margin-top:0;margin-bottom:1rem}p.lead{font-size:1.25rem;font-weight:300;padding:0 1rem}ul,ol,dl{margin-top:0;margin-bottom:1rem}ul,ol{padding-left:1.25rem}hr{position:relative;margin:1.5rem 0;border:0;border-top:1px solid #eee}.hr{padding-bottom:.5rem;border-bottom:1px solid #eee;margin-bottom:1.5rem}h4,h5,h6,.h4,.h5,.h6{margin-bottom:0.5rem;font-size:1rem}table{margin-bottom:1rem;width:100%;width:calc(100% + 2rem);margin-left:-1rem;border:1px solid #e5e5e5;border-collapse:collapse;border-spacing:0}td,th{padding:.25rem .5rem;border:1px solid #e5e5e5}td:first-child,th:first-child{padding-left:1rem}td:last-child,th:last-child{padding-right:1rem}thead+tbody,tbody+tbody,tfoot{border-top:3px double #e5e5e5}tbody tr:nth-child(odd) td,tbody tr:nth-child(odd) th{background-color:#f9f9f9}footer{margin-bottom:2rem}.page,.post{margin-bottom:3em}.page li+li,.post li+li{margin-top:.25rem}.page>header,.post>header{margin-bottom:2rem}.page-title,.post-title{margin-top:0}.post-date{display:block;margin-top:-0.5rem;margin-bottom:1rem;color:#9a9a9a}.related-posts{padding-left:0;list-style:none}.related-posts>li,.related-posts>li+li{margin-top:1rem}.related-posts>li>small,.related-posts>li+li>small{font-size:75%;color:#9a9a9a}.message{margin-bottom:1rem;padding:1rem;color:#787878;background-color:#f9f9f9;margin-left:-1rem;margin-right:-1rem}body,main{position:relative;overflow-x:hidden}@media screen{body::before{content:'';background:#e5e5e5;position:absolute;left:0;top:0;bottom:0}}@media screen and (min-width: 40em){html{font-size:17px}}@media screen and (min-width: 54em){html{font-size:16px}}@media screen and (min-width: 88em){html{font-size:17px}}@media screen and (min-width: 125em){html{font-size:18px}}.sr-only{display:none}.clearfix,.sidebar-social::after,.clearafter::after{content:"";display:table;clear:both}a,.a{position:relative;padding-bottom:.15rem;border-style:hidden}.img{overflow:hidden;background-color:#f9f9f9}.img>img{margin:0;width:100%;height:100%}.sixteen-nine{position:relative}.sixteen-nine::before{display:block;content:"";width:100%;padding-top:56.25%}.sixteen-nine>*{position:absolute;top:0;left:0;right:0;bottom:0}h1+hr,h2+hr,h3+hr,h4+hr,h5+hr,h6+hr{margin-top:0}.fade-in{animation-duration:500ms;animation-name:fade-in;animation-fill-mode:forwards}@keyframes fade-in{from{transform:translateY(-2rem);opacity:0}50%{transform:translateY(-2rem);opacity:0}to{transform:translateY(0);opacity:1}}.mb6{margin-bottom:10rem}.sidebar{color:rgba(255,255,255,0.75);text-align:left}.sidebar::before{content:"";position:absolute;z-index:2;top:0;left:0;bottom:0;right:0;background:linear-gradient(to bottom, rgba(32,32,32,0) 0%, rgba(32,32,32,0.5) 100%)}.sidebar a{color:#fff;border-bottom-color:rgba(255,255,255,0.2)}.right-side{width:100%;margin-left:auto;margin-right:auto}.right-side .ad-first{text-align:center}.right-side .ad-second{text-align:center}@media screen{.right-side{max-width:38rem;min-height:100vh}}@media screen and (min-width: 54em){.right-side{margin-left:20rem;margin-right:1rem;padding:4rem 1rem 12rem}}@media screen and (min-width: 72em){.right-side{margin-left:22rem;max-width:42rem}}@media screen and (min-width: 88em){.right-side{width:162px;margin-left:0rem;margin-right:0rem;padding:0rem;margin-top:10rem;display:block;float:left}}@media screen and (min-width: 96em){.right-side{width:300px;margin-right:0rem}}#_yDrawer{position:relative}@media screen{#_yDrawer{min-height:640px;min-height:100vh}}@media screen and (min-width: 54em){#_yDrawer{width:18rem;margin-left:0}}.sidebar-bg{position:absolute;height:100%;overflow:hidden;top:0;right:0;bottom:0;left:0;background:#202020 center / cover}.sidebar-box{display:flex;justify-content:center}.sidebar-sticky{position:relative;z-index:3}@media screen{.sidebar-sticky{-ms-overflow-style:none;overflow:-moz-scrollbars-none;height:100%;overflow:auto;position:absolute;padding:3rem 0rem;right:2.5rem;left:2.5rem}}.sidebar-sticky::-webkit-scrollbar{display:none}.sidebar-about>h1{color:#fff;font-size:2rem}.sidebar-nav>ul{list-style:none;padding-left:0;margin-bottom:.5rem}a.sidebar-nav-item{width:100%;font-weight:normal;display:block;line-height:1.75;padding:.25rem 0;border-bottom:1px solid rgba(255,255,255,0.2)}a.sidebar-nav-subitem{font-weight:normal;display:block;line-height:1.75;padding:.25rem 0;border-bottom:1px solid rgba(255,255,255,0.2)}@media screen{.y-drawer-scrim{z-index:2}.y-drawer-content{width:18rem;left:-18rem;z-index:3}}.sidebar-social{margin-bottom:.5rem}.sidebar-social>ul{list-style:none;padding-left:0;margin:0 -.25rem}.sidebar-social>ul>li{float:left}.sidebar-social>ul>li>a{display:inline-block;text-align:center;font-size:1.6rem;line-height:3rem;width:3.1249rem;height:4rem;padding:.5rem 0}.sidebar-social>ul li+li{margin-top:0}.fixed-top{position:fixed;top:0;left:0;width:100%;z-index:1}.navbar>.content{padding-top:0;padding-bottom:0;min-height:0;height:0}.menu{display:inline-block;padding:1.75rem 1.5rem;border-bottom:none;margin-left:-1.5rem;color:#9a9a9a !important}.menu::after{content:"\2630"}@media screen and (min-width: 54em){.menu{padding:1.25rem 1.5rem;position:absolute;left:-9999px}.menu:focus{position:static}}.animation-main{pointer-events:none}.loading{display:none}@media print{.menu{display:none}}.animation-main{opacity:0;will-change:opacity}.loading{position:absolute;top:0;right:0;padding:5.25rem 4.5rem;transform-origin:top right;transform:scale(0.33)}.content{position:relative;margin-left:auto;margin-right:auto;padding:5rem 1rem 12rem}@media screen{.content{min-height:100vh}}@media screen and (min-width: 54em){.content{padding:4rem 1rem 12rem;margin-left:19rem;margin-right:3rem}}@media screen and (min-width: 72em){.content{max-width:42rem;margin-left:21rem}}@media screen and (min-width: 88em){.content{float:left;width:100%;margin-left:22rem;margin-right:5rem}}@media screen and (min-width: 96em){.content{max-width:44rem}}@media screen and (min-width: 102em){.content{margin-left:25rem;margin-right:8rem}}.me{width:6.5rem;height:6.5rem;align-self:center;margin-right:20px;border-radius:100%;position:relative}@media screen and (min-width: 40em){.me{width:7rem;height:7rem}}@media screen and (min-width: 54em){.me{width:6.5rem;height:6.5rem}}@media screen and (min-width: 72em){.me{width:7rem;height:7rem}}main>footer{width:100%;position:absolute;bottom:0;left:0;right:0;padding:0 1rem;color:#9a9a9a;font-size:smaller;text-align:center}main>footer>p{margin-bottom:0}html{font-family:'Sans-serif'}h1,h2,h3,h4,h5,h6,.h1,.h2,.h3,.h4,.h5,.h6,.heading{font-family:'Sans-serif'}
+
+</style>
+
+
+<link rel="preload" href="http://localhost:4003/assets/css/hydejack.css?v=6.4.0" as="style" onload="this.rel='stylesheet'">
+
+<style id="_pageStyle">
+
+.content a{color:#4f86aa;border-color:rgba(79,134,170,0.2)}.content a:hover{border-color:#4f86aa}:focus{outline-color:#4f86aa}::selection{color:#fff;background:#4f86aa}::-moz-selection{color:#fff;background:#4f86aa}
+
+</style>
+
+
+<noscript>
+  <link rel="stylesheet" href="http://localhost:4003/assets/css/hydejack.css?v=6.4.0">
+  
+  
+  
+
+  
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+    <style>
+      html { font-family: 'Lato', 'Sans-serif' }
+      h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .heading { font-family: 'Lato', 'Sans-serif' }
+    </style>
+  
+
+  
+  <link rel="stylesheet" href="http://localhost:4003/assets/icomoon/style.css">
+</noscript>
+<!--<![endif]-->
+
+</head>
+
+<body>
+  <!-- =============== -->
+<!-- MENU            -->
+<!-- =============== -->
+<div class="navbar fixed-top">
+  <div class="content">
+    <span class="sr-only">Jump to:</span>
+    <a id="_menu" class="menu no-hover" href="#_title">
+      <span class="sr-only">Menu</span>
+    </a>
+  </div>
+</div>
+
+<!-- =============== -->
+<!-- CONTENT         -->
+<!-- =============== -->
+<div id="_yPushState">
+  <div class="fade-in">
+    <main id="_main" class="content" role="main" data-color="#4f86aa" data-image="/assets/img/nap.jpg">
+      
+
+<article id="post-recomm/2019/08/15/recommendation_system_basics" class="post" role="article">
+  <header>
+    <h1 class="post-title">
+      
+        추천 시스템 Basics
+      
+    </h1>
+
+    <p class="post-date heading">
+      <time datetime="2019-08-15T00:00:00+09:00">15 Aug 2019</time>
+      
+
+
+
+
+
+
+
+
+
+in <span>Recomm</span>
+
+      
+
+
+
+
+
+
+
+
+
+
+
+    </p>
+
+    <script data-ad-client="ca-pub-2252618542833203" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    
+  <div class="hr" style="padding-bottom:0"></div>
+
+
+  </header>
+  
+    <!--
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  -->
+  
+    <div class="markdown-body">
+
+
+        <!--
+<style>
+.myAd1190 { display:block; width:98%; height: 280px; }
+@media(min-width: 600px) { .myAd1190 { display: none; } }
+</style>
+<ins class="adsbygoogle myAd1190"
+    data-ad-client="ca-pub-5105555504153863"
+    data-ad-slot="6481487416"
+    ></ins>
+<script>
+(adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+-->
+
+
+<br/>
+      <h1 id="추천-시스템-basics">추천 시스템 Basics</h1>
+<h2 id="추천-시스템이란">추천 시스템이란</h2>
+
+<p><strong>특정 사용자</strong>가 <strong>관심을 가질 만한 정보</strong>를 추천하는 것이다. Information filtering의 일종이라고 볼 수 있다. 여기서 말하는 <strong>관심</strong>은 정의하기 나름이다. 아이템의 종류가 동영상이라면 동영상을 시청하는 것이 관심의 표현일 것이다. 아이템의 종류가 쇼핑에 관련된 제품이라면 구매나 장바구니에 넣는 것이 관심을 나타낸다. 얼마나 관심을 가지는지도 정의하기 나름이 된다. 유튜브의 추천 시스템은 다음 그림과 같이 메인피드에서 내가 볼 만한 동영상을 보여준다. 유튜브에서는 동영상을 시청한 시간을 관심의 척도로 사용한다.</p>
+
+<p><img src="/assets/img/Untitled-6bef25bc-9a2e-45a7-bb61-4e0a639b6082.png" width="400" /></p>
+
+<p><a href="https://www.idownloadblog.com/2016/04/26/youtube-new-homepage-design/">https://www.idownloadblog.com/2016/04/26/youtube-new-homepage-design/</a></p>
+
+<p>특정 서비스에서 아이템의 수가 점점 많아지면서 사용자가 정보를 찾기가 어려워진다. 수많은 정보 속에서 사용자가 원하는 정보를 찾을 수 있는 방법에는 두 가지가 있다. <strong>검색</strong>은 query와 document 사이의 관계를 분석하는 것이라면 <strong>추천</strong>은 user와 item 사이의 관계를 분석하는 것이다.</p>
+
+<ul>
+  <li><strong>검색</strong> : 사용자가 (관심 있는 아이템에 대한) query를 던지면 query와 관련이 많은 document list를 반환</li>
+  <li><strong>추천</strong> : 사용자의 이전 행동을 기반으로 관심 있을만한  아이템 리스트를 반환</li>
+</ul>
+
+<p>query를 user라고 보고 document를 item이라고 본다면 검색과 추천은 상당히 비슷하다고 볼 수 있다. 실제로 learning to rank 라는 task는 검색과 추천 모두에 활용할 수 있다. 유튜브의 예를 들면 검색 버튼을 통해 원하는 동영상을 찾을 수도 있고 메인 피드에서 재미 있을만한 동영상을 클릭해서 볼 수 있다. 혹은 검색을 통해 나온 아이템을 선택하면 그 아이템과 비슷한 아이템을 추천할 수도 있다. 이렇게 검색과 추천은 서로 비슷하면서도 함께 사용해서 사용자가 좋아할만한 아이템을 더 잘 찾을 수 있게 도와준다.</p>
+
+<p>추천 시스템을 크게 나누자면 다음 두 개가 있다.</p>
+
+<ul>
+  <li><strong>content-based filtering</strong> : user나 item은 자체의 특징으로 표현된다. 예를 들어 item이 음악이라면 음악의 제목, 가수, 장르 등이 item을 표현하게 된다. 사용자가 만약 재즈 음악을 들었다면 content-based filtering 은 사용자에게 다른 재즈 음악을 추천할 것이다. 실제로는 이렇게 간단하게 item을 표현하지는 않고 수백개 정도의 feature(?)로 표현한다. collaborative filtering은 user와 item 간의 행동을 분석하는 방법이라고 하면 content-based filtering은 item 자체끼리 비슷한지 비교하는 방법이다. Content-based filering에서 가장 많이 사용되는 방법은 TF-IDF 이다 (자연어처리 쪽에서 널리 사용되는 문장을 vector로 표현하는 방법이다). item을 하나의 vector로 표현한 다음에 clustering 알고리즘을 통해 item을 몇 종류의 cluster로 나눈다. 아래 그림 같이 user가 콜라를 선택했다면 콜라와 같은 cluster에 있는 Duff라는 음류수를 추천하는 것이다. content-based filtering은 과거의 user가 봤던 유형의 item만 추천하기 때문에 한계가 많다. 하지만 user-item iteraction 정보가 없어도 추천이 바로 가능하므로 cold-start 문제는 없다.</li>
+</ul>
+
+<p><img src="/assets/img/Untitled-fd0d3412-8a14-4346-abde-23cad44cde7a.png" width="400" /></p>
+
+<p><a href="http://dataconomy.com/2015/03/an-introduction-to-recommendation-engines/">http://dataconomy.com/2015/03/an-introduction-to-recommendation-engines/</a></p>
+
+<ul>
+  <li><strong>collaborative filtering</strong> : 줄여서 CF라고 한다. CF는 user-item의 상호작용 정보를 통해 user가 좋아할 만한 item을 추천한다. 기본적인 개념은 user-item interaction 정보를 통해 비슷한 사용자를 찾고 내가 보지 않았지만 비슷한 사용자가 봤던 item을 추천하는 것이다. 이렇게 비슷한 user끼리 서로 어떤 item을 좋아할지 협력해서 filtering하기 때문에 이름이 collaborative filtering이다. CF은 content-based filtering과는 다르게 user나 item 자체의 특성을 추천에 사용하지 않는다. 아래 그림에서 피자와 샐러드라는 item을 user가 샀다고 하더라도 user에게는 그저 item1, item2일 뿐이다. CF는 item 자체의 ‘content’를 모르고 추천하기 때문에 더 많은 user-item interaction 데이터를 필요로 한다. user-user, item-item, user-item similiarity를 계산하기 위한 방법에는 KNN, pearson correlation 등이 있다.</li>
+</ul>
+
+<p><img src="/assets/img/Untitled-47e94b86-b443-443b-97ef-859fd0b6750f.png" width="400" /></p>
+
+<p><a href="http://dataconomy.com/2015/03/an-introduction-to-recommendation-engines/">http://dataconomy.com/2015/03/an-introduction-to-recommendation-engines/</a></p>
+
+<ul>
+  <li>hybrid recommendation system : content-based filtering과 collaborative filtering은 장단점이 있기 때문에 두 방법을 합쳐서 사용하는 연구가 많이 진행됐다. 예를 들면 다음과 같이 두 모델에서 나온 추천을 섞어서 사용자에게 전달하는 방법도 있다.</li>
+</ul>
+
+<p><img src="/assets/img/Untitled-aecf588d-3028-4275-aca2-97c71efb58ce.png" width="400" /></p>
+
+<p>참고 자료</p>
+
+<p><a href="https://khanrc.tistory.com/entry/%EC%B6%94%EC%B2%9C-%EC%8B%9C%EC%8A%A4%ED%85%9CRecommendation-System">추천 시스템(Recommendation System)</a></p>
+
+<p><a href="https://ko.wikipedia.org/wiki/%EC%B6%94%EC%B2%9C_%EC%8B%9C%EC%8A%A4%ED%85%9C">추천 시스템</a></p>
+
+<p><a href="http://dataconomy.com/2015/03/an-introduction-to-recommendation-engines/">An Introduction to Recommendation Engines</a></p>
+
+<h2 id="collaborative-filtering">Collaborative Filtering</h2>
+
+<p>추천 시스템은 최근에 위에서 언급한 CF 위주로 많은 발전을 이루었다. 누군가 추천 시스템을 만든다고 하면 우선 CF을 사용하라고 할 것이다. CF는 user-item interaction 데이터를 활용해서 추천을 하는 것이다. 하지만 user가 item에 interaction 하는지 (feedback) 데이터마다 다를 수 있다. 간단하게는 다음과 같다.</p>
+
+<ul>
+  <li><strong>explicit feedback</strong> : item에 대한 user의 선호도를 직접적으로 알 수 있는 데이터이다. 영화 평점, 맛집 별점과 같은 피드백 데이터를 이야기한다. user가 직접 별점을 계속 매겨야하므로 데이터셋의 크기가 보통 작다.</li>
+  <li><strong>implicit feedback</strong> : 서비스에서 user한 행동을 기록한 것을 말한다. 예를 들면 뉴스 사이트에서 뉴스를 클릭한 기록이 될 수 있다. 클릭을 통해서 직접적으로 item에 대한 user의 선호도를 알 수 없기 때문에 implicit feedback이라고 한다. explicit feedback에 비해 데이터의 품질은 낮으나 데이터셋의 양이 보통 비교가 안될만큼 크기 때문에 최신 추천 시스템은 implicit feedback 데이터를 통해 추천하는 방향으로 발전했다.</li>
+</ul>
+
+<p><img src="/assets/img/Untitled-f435adb2-5a77-4b3e-9024-1de5485e9863.png" width="400" /></p>
+
+<p><a href="https://jinyi.me/2018/06/Recommendation-System-Miscellus/">https://jinyi.me/2018/06/Recommendation-System-Miscellus/</a></p>
+
+<p>CF의 학습에 주어지는 데이터의 형태는 user-item matrix이다. 다음 그림이 user-item matrix의 예시이다. 만약 데이터의 형태가 explicit feedback이라면 user가 영화에 대해 줬던 rating 값을 적는다. 이렇게 matrix를 만들고 나면 (?)로 비어있는 곳들이 있는데 이 비어있는 곳을 채우는 것이 CF의 목표라고 볼 수 있다. 따라서 이 문제를 matrix completion이라고 부르기도 한다. 빈 공간을 채웠다면 채운 숫자에 따라 사용자에게 추천할 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-56357041-7c29-49bc-a455-a8f556c45f81.png" width="400" /></p>
+
+<p><a href="https://www.researchgate.net/figure/Example-of-user-item-ratings-matrix-in-a-movie-recommendation-scenario_fig2_300646445">https://www.researchgate.net/figure/Example-of-user-item-ratings-matrix-in-a-movie-recommendation-scenario_fig2_300646445</a></p>
+
+<p>만약 implicit feedback라면 rating이 아니라 interaction이 있었다면 1이라고 적는다. interaction이 없던 곳은 0으로 채운다.  Explicit feedback 데이터셋에서는 rating 자체가 이미 item에 대한 선호도를 담고 있기 때문에 rating 안에 긍정적인 feedback과 부정적인 feedback 모두를 담고 있다. 하지만 implicit feedback 데이터셋에서는 오직 positive feedback 정보 밖에 없다. interaction이 일어난 positive feedback에 대해서만 학습한다면 user의 선호도를 학습하기가 어렵다. 따라서 implicit feedback 데이터셋에서는 ‘missing data’를 모두 잠정적인 negative feedback으로 보고 0으로 채운다. 따라서 implicit feedback 데이터셋으로 CF를 학습할 때는 matrix의 빈 공간을 채우는 것이 학습의 목표가 아니라 주어진 matrix에서 사용자의 선호 패턴을 알아내는 것이 목표가 된다.</p>
+
+<p><img src="/assets/img/Untitled-c06c3086-9140-4e8c-9d3f-eaecd218a0ab.png" width="400" /></p>
+
+<p>구체적으로 어떻게 CF가 학습 하는지 알아보기 전에 CF가 공통적으로 안고 있는 문제는 다음과 같다. 이 이외에도 많은 문제가 있다.</p>
+
+<ul>
+  <li><strong>cold-start problem</strong> : CF를 기반으로 추천하려면 user나 item이나 충분한 수의 interaction 데이터가 있어야한다. 따라서 새로운 user가 추천을 받거나 새로운 item이 잘 추천되기 위해서는 여러 개의 iteraction이 쌓일 때까지 기다려야 한다. 즉, user-item matrix에서 새로운 user라는 row가 추가되거나 새로운 item이라는 새로운 column이 추가되었을 때 추천을 할 수 없는 문제이다. 이것을 cold-start 문제라고 부른다.</li>
+  <li><strong>sparsity</strong> : 실제 서비스에서는 user와 item이 수백만일 수 있는데 이러면 matrix는 상당히 sparse 해진다. Sparsity는 전체 matrix에서 비어있는 칸이 얼마나 되는지로 측정한다. CF는 sparsity가 0.97 정도 이하일 때 잘 작동한다는 이야기가 있다. Sparsity는 인위적으로 줄일 수도 있다. 예를 들어 일정 개수 이상 interaction이 있는 user와 item만 사용하는 식으로 sparsity를 줄일 수 있다.</li>
+  <li><strong>diversity</strong> : CF는 user의 past history를 사용해서 추천을 하기 때문에 비슷한 item만 계속 추천할 수도 있다. 당장은 user가 좋아하는 item을 보여주면 user가 좋아하겠지만 금방 실증날 것이다. 유튜브에서 강아지 동영상을 봤는데 그 이후로 메인 피드에 강아지만 나온다고 생각해보면 이해가 빠를 것이다. 길게 봤을 때 user의 retention에 안 좋은 영향을 준다. 따라서 추천 시스템은 user의 취향을 반영하면서도 다양한 item을 보여줘야 한다.</li>
+</ul>
+
+<p>CF는 두 가지로 나뉘는데 memory-based와 model-based 방법이다. 하나씩 살펴보자.</p>
+
+<ul>
+  <li><strong>memory-based method</strong> : 메모리 기반이라고 하면 표현이 좀 안 와닿을 수 있다. 데이터로 주어지는 user-item matrix를 그대로 다 활용해서 특정 user가 특정 item에 줄 rating을 예측하는 방법이다.</li>
+  <li><strong>model-based method :</strong> user-item matrix를 통해 model을 학습하고 예측은 이 모델을 사용해서 하는 방법이다. CF에서는 제일 유명한 방법인 matrix factorization이 model-based 방법에 해당한다.</li>
+</ul>
+
+<h3 id="memory-based-method">Memory-based method</h3>
+
+<p>user-item matrix가 주어졌고 특정 user i가 아직 interaction을 하지 않은 item j에 대한 rating을 예측하고 싶다고 해보자. memory-based 방법에서 기본적인 단계는 다음과 같다.</p>
+
+<ul>
+  <li>user i의 평균 예측 점수 구하기 (사람마다 점수 주는 평균이 다르므로)</li>
+  <li>user i와 다른 user 들과 similarity를 구하기</li>
+  <li>user i와 가장 유사한 k명 추출하기</li>
+  <li>다른 user 들이 item j에 대해 매긴 점수를 weighted sum</li>
+  <li>user i와 위에서 계산한 weighted sum을 통해 최종 rating 예측</li>
+</ul>
+
+<p>memory-based 방법을 예시를 통해 살펴보자. 예시는 다음 블로그에서 가져왔다.</p>
+
+<p><a href="https://buildingrecommenders.wordpress.com/2015/11/18/overview-of-recommender-algorithms-part-2/">Overview of Recommender Algorithms - Part 2</a></p>
+
+<p>다음과 같이 사용자가 책에 대해 rating을 explicit하게 매긴 데이터가 주어졌다고 해보자.</p>
+
+<p><img src="/assets/img/Untitled-90c7ca5f-c9da-4b20-a0a1-945509aa43b5.png" width="400" /></p>
+
+<p>user-based CF에서는 user 사이의 similarity를 구해야 한다. user 사이의 similarity를 구하기 위한 방법에는 여러가지가 있는데 그 중에서 가장 대표적인 것이 pearson correlation이다. 두 명의 user가 함께 점수를 매긴 rating 정보를 통해 similarity를 구할 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-48ac373b-7d4a-499c-b42d-77b022d22801.png" width="400" /></p>
+
+<p>Pearson correlation이 아니라 cosine similarity를 통해서 유사도를 구할 수도 있다. Cosine similarity는 다음과 같은 식으로 구할 수 있다. Cosine similarity는 user나 item의 평균 rating을 계산하지 않아도 되기 때문에 계산적인 측면에서 pearson correlation 보다 더 효율적이다. 하지만 특정 사용자의 점수 기준이 너무 높거나 낮거나 또는 특정 아이템이 받는 점수가 평균적으로 너무 높거나 낮거나 할 때 유사도가 잘 계산이 안될 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-39db3088-bc63-4006-badb-d9954e780757.png" width="400" /></p>
+
+<p>위 similarity 식을 이용해서 추천을 하고자 하는 사용자와 다른 사용자 사이의 similarity를 구하고 정렬한다. 이렇게 다른 사용자들을 similarity에 따라 정렬을 했다면 그 중에서 가장 similarity가 높은 사용자들을 추려낸다.</p>
+
+<p><img src="/assets/img/Untitled-ce620a4c-d8f5-4da0-b6f8-7f83580a1e04.png" width="400" /></p>
+
+<p>가장 비슷한 사용자를 추려냈다면 다음 식을 통해 rating을 예측할 수 있다. k는 nomaralizing factor라고 보면 되고 simil이 user 사이의 similarity 값이다.</p>
+
+<p><img src="/assets/img/Untitled-3d4b9910-c311-423f-b8b9-62cf6cf7b7b8.png" width="400" /></p>
+
+<p><img src="/assets/img/Untitled-016e5dbf-ffc7-44fa-a10b-5c9e39be0bb7.png" width="400" /></p>
+
+<p>예를 들어 가장 비슷한 사용자 2명만을 이용해서 추천한다고 해보자. 이 사용자 2명이 본 책 중에 이미 추천 받을 사용자가 본 책을 빼고 rating을 예측한다. 다음 그림에서는 간단하게 하기 위해서 평균 rating 정보는 생략했다. 예측한 rating에 따라 가장 사용자가 좋아할 만한 책을 알아낼 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-b09adff9-d709-4ac1-93d4-b85438d707f6.png" width="400" /></p>
+
+<p>memory-based method는 matrix의 sparsity가 커지면 커질수록 잘 동작하지 않는 경향이 있다. 따라서 model-based method 쪽으로 연구는 이어지게 된다.</p>
+
+<h3 id="model-based-method">Model-based method</h3>
+
+<p>user-item matrix를 통해 model을 학습하는 방법이다. Matrix로부터 model이 학습하고 나면 추천을 할 때는 model만 있으면 된다. model-based CF는 memory-based CF에 비해 scalability와 추천 속도에서 장점이 있다. 대신 데이터셋 전체를 사용해서 추천 하는 것이 아니라 model만을 사용하기 때문에 추천이 정확하지 않을 수 있다는 단점이 있다. Model의 종류는 여러가지가 있다. Bayesian Network, Decision Tree, Latent Factor Models, MDP 등 다양하다. 여기서 살펴볼 것은 Matrix Factorization이라는 방법으로 Latent Factor Model의 일종이다.</p>
+
+<h2 id="matrix-factorization">Matrix Factorization</h2>
+
+<p>MF는 다음 논문을 참고했다.</p>
+
+<p><a href="https://datajobs.com/data-science-repo/Recommender-Systems-%5BNetflix%5D.pdf">https://datajobs.com/data-science-repo/Recommender-Systems-[Netflix].pdf</a></p>
+
+<p>MF는 latent factor 모델의 일종이다. Latent factor 모델이 하고자 하는 것은 item과 user를 20-100 정도의 vector로 표현하고자 하는 것이다. 이 vector는 데이터에서 나타나는 rating 패턴에 의해 학습되는 것이다. content-based 방법에서 item을 제목이나 장르, 가수 등으로 표현했다면 latent factor 모델에서는 interaction pattern으로부터 학습된, 기계가 이해하는 특징으로 표현한다. Latent factor는 interaction 정보를 포함하기 때문에 풍부하게 item이나 user를 표현할 수 있다.</p>
+
+<p>Content-based method와는 또 다른 것이 item과 user의 latent factor는 vector의 dimension을 공유한다는 것이다. 다음 예제를 보면 이해가 더 쉬울 것이다. 다음 그림은 latent factor 모델을 단순화시킨 그림이다. 사람과 영화 모두 serious 축과 성별 축 상에서의 값으로 표현한다. 따라서 latent factor 모델에서는 user와 item의 latent factor가 각 dimension 마다 같은 의미를 지닌다. Latent-factor model에서는 user와 item factor의 dot-product 값을 측정하고 그 값이 크면 추천한다. 같은 공간 상에 있기 때문에 가능한 것이다.</p>
+
+<p><img src="/assets/img/Untitled-87d5c1c7-f6ef-44a6-ab29-fde9a30d609d.png" width="400" /></p>
+
+<p>다음 논문에서 Matrix Factorization에 대해 다음과 같이 설명한다. 이 설명에서도 보면 user와 item을 같은 latent factor space 상에 mapping 한다고 표현한다.</p>
+
+<p><a href="https://datajobs.com/data-science-repo/Recommender-Systems-%5BNetflix%5D.pdf">https://datajobs.com/data-science-repo/Recommender-Systems-[Netflix].pdf</a></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Matrix factorization models map both users and items to a joint latent factor space of dimensionality f, such that user-item interactions are modeled as inner products in that space
+</code></pre></div></div>
+
+<p>Matrix Factorization을 식과 그림으로 나타내는 것은 어렵지 않다. item latent factor matrix를 q라고 하고 user latent factor matrix를 p라고 한다면 user u의 item i에 대한 rating은 다음과 같은 식으로 표현할 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-a70070cd-d4dd-46ce-96ea-05837e925d1b.png" width="400" /></p>
+
+<p>그림으로 보자면 원래 user-item matrix를 user의 latent factor matrix와 item의 latent factor matrix로 쪼개는 것이라고 볼 수 있다(matrix factorization 자체가 행렬을 인수분해 한다는 뜻이니까). 이 때, q와 p를 곱한 값으로 원래 user-item matrix를 만들어내야 하는데 그것이 MF 학습의 핵심이다.</p>
+
+<p><img src="/assets/img/Untitled-946921cd-6d3f-4713-aff7-2267f622ba79.png" width="400" /></p>
+
+<p><a href="https://buildingrecommenders.wordpress.com/2015/11/18/overview-of-recommender-algorithms-part-2/">https://buildingrecommenders.wordpress.com/2015/11/18/overview-of-recommender-algorithms-part-2/</a></p>
+
+<p>MF의 objective function은 다음과 같이 정의할 수 있다. 목표는 원래 rating을 예측하는 것으로 loss function은 MSE error를 사용한다. MF 중에서 MSE error가 아닌 cross-entropy를 사용하는 경우도 있지만 일단 MSE error만 생각하자. 아래 식에서 k는 rating을 알고 있는 user, item pair를 의미한다. 만약 MSE error만 최소화하는 것으로 학습하면 쉽게 overfitting 될 것이다. 따라서 L2 regularization을 사용한다.</p>
+
+<p><img src="/assets/img/Untitled-85a08543-f738-45c1-8d30-3626fee8aaeb.png" width="400" /></p>
+
+<p>위 objective function을 최소화하는 p와 q를 찾기 위한 방법이 2가지가 있다.</p>
+
+<h3 id="sgdstochastic-gradient-descent">SGD(stochastic gradient descent)</h3>
+
+<p>머신러닝을 하는 사람이라면 SGD에 대해 잘 알고 있을 것이다. error를 왼쪽과 같이 쓴다면 p와 q는 오른쪽 식과 같은 식으로 업데이트 할 수 있다(위의 loss function을 편미분해서 뺀 것이다).</p>
+
+<p><img src="/assets/img/Untitled-ea7f2b35-e501-417e-8314-b5ed1103a746.png" width="400" /></p>
+
+<p><img src="/assets/img/Untitled-2c39105a-e84a-4360-b3bf-018532efa446.png" width="400" /></p>
+
+<h3 id="alsalternating-least-square">ALS(alternating least square)</h3>
+
+<p>아래 objective function에서 p와 q를 모르기 때문에 convex optimization이 아니다. 이 objective function을 convex하게 바꿔주는 방법이 ALS이다. 방법은 간단하다. p와 q 둘 중 하나를 고정하면 전체 식은 convex하게 된다. 따라서 p의 값(만약 q를 고정했다고 하면)은 optimal하게 결정된다. p와 q를 번갈아가면서 고정하고 업데이트를 하는 식으로 학습을 진행한다. 다음 objective function이 수렴할 때까지 그 과정을 반복하면 된다.</p>
+
+<p><img src="/assets/img/Untitled-85a08543-f738-45c1-8d30-3626fee8aaeb.png" width="400" /></p>
+
+<p>SGD가 ALS보다 간단하고 빠른 경향이 있지만 ALS는 parallel하게 계산할 수 있다는 장점이 있다. ALS에 대한 자세한 설명은 ‘Collaborative Filtering for Implicit Feedback Datasets’ 논문을 참고하면 된다.</p>
+
+<h3 id="additional-bias">Additional bias</h3>
+
+<p>MF는 user factor와 item factor의 단순 dot product로 rating을 표현하려고 한다. 하지만 특정 사용자는 평균적으로 모든 item에 높은 점수를 줄 수도 있다. MF의 objective function은 이런 점을 잘 반영하지 못한다. 따라서 user와 item에 대해 bias를 사용한다. user u가 item i에 매긴 rating에 대한 바이어스는 오른쪽 식과 같이 표현할 수 있다.</p>
+
+<p><img src="/assets/img/Untitled-18bbb271-54aa-4b94-b30c-7ca53a18ea29.png" width="400" /></p>
+
+<p><img src="/assets/img/Untitled-90e81317-aaf6-47f9-a541-0aead105ab60.png" width="400" /></p>
+
+<p>user bias와 item bias 모두 학습 대상이기 때문에 objective function에서 포함해서 학습한다.</p>
+
+<p><img src="/assets/img/Untitled-8de4c4ed-58da-42c3-9728-a870d16ec871.png" width="400" /></p>
+
+<h3 id="code-review-of-sgd-mf">Code Review of SGD MF</h3>
+
+<p>SGD를 이용해서 학습하는 기본적인 MF에 대한 코드는 다음 글에 잘 소개되어 있다.</p>
+
+<p><a href="https://yamalab.tistory.com/92">[Recommender System] - Python으로 Matrix Factorization 구현하기</a></p>
+
+<p>P는 user latent matrix이고 Q는 item latent matrix이다. num_users는 사용자 수이고 num_items는 아이템의 수를 말한다. k는 latent factor의 dimension을 말한다. P와 Q는 normal distribution에 따라 parameter initialization을 해준다. R은 user-item matrix를 의미한다. 위에서 말한 것처럼 user, item, 그리고 모든 rating에 대한 bias를 사용한다. user와 item에 대한 bias는 user 수, item 수의 크기를 가진다. 또한 global bias는 상수이다. 원하는 epoch 만큼 학습을 하는데 각 epoch에서 0이 아닌 모든 rating에 대해서 loss를 미분해서 업데이트한다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""
+        training Matrix Factorization : Update matrix latent weight and bias
+    
+        참고: self._b에 대한 설명
+        - global bias: input R에서 평가가 매겨진 rating의 평균값을 global bias로 사용
+        - 정규화 기능. 최종 rating에 음수가 들어가는 것 대신 latent feature에 음수가 포함되도록 해줌.
+    
+        :return: training_process
+        """</span>
+    
+        <span class="c1"># init latent features
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">_P</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_users</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_k</span><span class="p">))</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">random</span><span class="p">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_items</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_k</span><span class="p">))</span>
+    
+        <span class="c1"># init biases
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">_b_P</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_users</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_b_Q</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_items</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">np</span><span class="p">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_R</span><span class="p">[</span><span class="n">np</span><span class="p">.</span><span class="n">where</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_R</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)])</span>
+    
+        <span class="c1"># train while epochs
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">_training_process</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_epochs</span><span class="p">):</span>
+    
+            <span class="c1"># rating이 존재하는 index를 기준으로 training
+</span>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_users</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_num_items</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">_R</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="p">.</span><span class="n">gradient_descent</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="p">.</span><span class="n">_R</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+            <span class="n">cost</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">cost</span><span class="p">()</span>
+            <span class="bp">self</span><span class="p">.</span><span class="n">_training_process</span><span class="p">.</span><span class="n">append</span><span class="p">((</span><span class="n">epoch</span><span class="p">,</span> <span class="n">cost</span><span class="p">))</span>
+    
+            <span class="c1"># print status
+</span>            <span class="k">if</span> <span class="bp">self</span><span class="p">.</span><span class="n">_verbose</span> <span class="o">==</span> <span class="bp">True</span> <span class="ow">and</span> <span class="p">((</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">"Iteration: %d ; cost = %.4f"</span> <span class="o">%</span> <span class="p">(</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">cost</span><span class="p">))</span>
+</code></pre></div></div>
+<p>self.gradient_descent를 통해서 p와 q 그리고 bias 들을 업데이트한다. 업데이트는 user, item pair 하나 하나에 대해 gradient를 구해서 한다. gradient_descent 함수는 다음과 같다. 만약 prediction을 구했다고 하면 prediction과 rating의 차이를 error로 정의한다. bias를 업데이트 할 때는 loss function을 bias로 미분해서 gradient를 구해서 업데이트한다.</p>
+
+<p><img src="/assets/img/Untitled-8de4c4ed-58da-42c3-9728-a870d16ec871.png" width="400" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">gradient_descent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">rating</span><span class="p">):</span>
+        <span class="s">"""
+        graident descent function
+    
+        :param i: user index of matrix
+        :param j: item index of matrix
+        :param rating: rating of (i,j)
+        """</span>
+    
+        <span class="c1"># get error
+</span>        <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">get_prediction</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">rating</span> <span class="o">-</span> <span class="n">prediction</span>
+    
+        <span class="c1"># update biases
+</span>        <span class="bp">self</span><span class="p">.</span><span class="n">_b_P</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">error</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">_reg_param</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_b_P</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_b_Q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_learning_rate</span> <span class="o">*</span> <span class="p">(</span><span class="n">error</span> <span class="o">-</span> <span class="bp">self</span><span class="p">.</span><span class="n">_reg_param</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_b_Q</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+    
+        <span class="c1"># update latent feature
+</span>        <span class="n">dp</span><span class="p">,</span> <span class="n">dq</span> <span class="o">=</span> <span class="bp">self</span><span class="p">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_learning_rate</span> <span class="o">*</span> <span class="n">dp</span>
+        <span class="bp">self</span><span class="p">.</span><span class="n">_Q</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+=</span> <span class="bp">self</span><span class="p">.</span><span class="n">_learning_rate</span> <span class="o">*</span> <span class="n">dq</span>
+</code></pre></div></div>
+<p>prediction은 다음 수식을 코드로 구현한 것이다.</p>
+
+<p><img src="/assets/img/Untitled-90e81317-aaf6-47f9-a541-0aead105ab60.png" width="400" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">get_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="s">"""
+        get predicted rating: user_i, item_j
+        :return: prediction of r_ij
+        """</span>
+        <span class="k">return</span> <span class="n">b</span> <span class="o">+</span> <span class="n">b_P</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">b_Q</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:].</span><span class="n">dot</span><span class="p">(</span><span class="n">Q</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:].</span><span class="n">T</span><span class="p">)</span>
+</code></pre></div></div>
+<p>user latent factor와 item latent factor의 gradient는 다음과 같이 구한다. loss 식을 p와 q에 대해서 편미분해서 구한 것이다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="s">"""
+        gradient of latent feature for GD
+    
+        :param error: rating - prediction error
+        :param i: user index
+        :param j: item index
+        :return: gradient of latent feature tuple
+        """</span>
+    
+        <span class="n">dp</span> <span class="o">=</span> <span class="p">(</span><span class="n">error</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_Q</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_reg_param</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">dq</span> <span class="o">=</span> <span class="p">(</span><span class="n">error</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_P</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="p">.</span><span class="n">_reg_param</span> <span class="o">*</span> <span class="bp">self</span><span class="p">.</span><span class="n">_Q</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">return</span> <span class="n">dp</span><span class="p">,</span> <span class="n">dq</span>
+</code></pre></div></div>
+<p>cost는 단지 실제 rating과 prediction의 차이가 얼마나 나는지 보는 것으로서 원래 Loss 식에서 regularization term을 뺀 값이라고 볼 수 있다. 매 epoch 마다 cost를 측정하면서 cost가 수렴하면 학습을 멈춘다.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="k">def</span> <span class="nf">cost</span><span class="p">():</span>
+        <span class="n">xi</span><span class="p">,</span> <span class="n">yi</span> <span class="o">=</span> <span class="n">R</span><span class="p">.</span><span class="n">nonzero</span><span class="p">()</span>
+        <span class="n">predicted</span> <span class="o">=</span> <span class="n">get_complete_matrix</span><span class="p">()</span>
+        <span class="n">cost</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="n">yi</span><span class="p">):</span>
+            <span class="n">cost</span> <span class="o">+=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">R</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span> <span class="o">-</span> <span class="n">predicted</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="p">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cost</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+</code></pre></div></div>
+
+      <br/>
+      <br/>
+        <!--블로그-하단-반응형
+      <ins class="adsbygoogle"
+          style="display:block; width:100%; height:300px;"
+          data-ad-client="ca-pub-5105555504153863"
+          data-ad-slot="1037589043"
+          data-ad-format="auto"></ins>
+      <script>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+      -->
+    </div>
+  
+
+</article>
+
+  <hr class="dingbat" />
+
+  <div class="share">
+      <h2>Share this post</h2>
+      <div class="share-body">
+        <a href="http://twitter.com/share?text=추천 시스템 Basics&amp;url=http://localhost:4003/recomm/2019/08/15/recommendation_system_basics/"
+    onclick="window.open(this.href, 'twitter-share', 'width=550,height=235');return false;">
+            <span class="icon-twitter">
+            </span>
+        </a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=http://localhost:4003/recomm/2019/08/15/recommendation_system_basics/"
+    onclick="window.open(this.href, 'facebook-share','width=580,height=296');return false;">
+            <span class="icon-facebook">
+            </span>
+        </a>
+    </div>
+  </div>
+  <br/>
+
+
+
+
+
+
+  <aside class="author" role="complementary">
+    <div class="author">
+  <h2 class="page-title hr">
+    About
+  </h2>
+<div class="author-body">
+  
+    
+  
+
+  
+
+  <img
+    src="/assets/img/me.jpeg"
+    class="me"
+    alt="woongwon lee"
+    srcset="/assets/img/me.jpeg 1x,/assets/img/me.jpeg 2x"
+    
+  />
+
+
+  
+  <div class="author-body-description">
+    <p>Machine Learning Engineer</p>
+
+  </div>
+</div>
+</div>
+
+  </aside>
+
+
+
+
+
+<aside class="related" role="complementary">
+  <h2 class="hr">Related Posts</h2>
+
+  <ul class="related-posts">
+    
+      
+      
+      
+        
+          
+          
+        
+        
+          
+
+
+<li class="h4">
+  <a href="/recomm/2019/08/15/neural_collaborative_filtering/" data-flip="title">
+    <span>Neural Collaborative Filtering 논문 리뷰</span>
+  </a>
+  <small><time datetime="2019-08-15T00:00:00+09:00">
+    15 Aug 2019
+  </time></small>
+</li>
+
+        
+      
+    
+  </ul>
+</aside>
+
+
+
+      
+        <aside class="comments" role="complementary">
+  <h2>Comments</h2>
+  <hr/>
+
+  <div id="disqus_thread"></div>
+
+  <script>
+    !function(s,i){function e(e){var t=s.pageYOffset||i.body.scrollTop;s.DISQUS&&!s._disqusThis&&!s._disqusFirst&&t+s.innerHeight>=s._disqusThreadOffsetTop&&(s._disqusThis=!0,s.DISQUS.reset({reload:!0,config:d}))}var d=function(){this.page.title="추천 시스템 Basics",this.page.identifier="/recomm/2019/08/15/recommendation_system_basics",this.page.url="http://localhost:4003/recomm/2019/08/15/recommendation_system_basics/"};s._disqusFirst=void 0===s._disqusFirst||s._disqusFirst,s._disqusLoading=void 0!==s._disqusLoading&&s._disqusLoading,s._disqusThis=!1,s._disqusThreadOffsetTop=i.getElementById("disqus_thread").offsetTop,s._disqusLoading?s._disqusFirst=!1:(s._disqusLoading=!0,loadJSDeferred("//dnddnjs.disqus.com/embed.js"),s.addEventListener?s.addEventListener("scroll",e,{passive:!0}):s.attachEvent?s.attachEvent("onscroll",e):s.onscroll=e)}(window,document);
+
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+</aside>
+
+      
+
+      <footer>
+  <hr/>
+  
+    <p>© 2018. by Woongwon Lee</p>
+
+  
+  <p>
+    <code>Powered by <a href="https://dnddnjs.github.io/">dnddnjs</a></code>
+  </p>
+</footer>
+
+    </main>
+    <!--<div class="right-side">
+  <div class="ad-first">
+    <!--
+    <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- 블로그-상단-모바일
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:100%;"
+         data-ad-client="ca-pub-5105555504153863"
+         data-ad-slot="9090558636"
+         data-ad-format="auto"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    -->
+  </div>
+<br/>
+<br/>
+  <!--
+  <div class="ad-second">
+    <!-- 블로그-스카이스크래퍼
+    <ins class="adsbygoogle"
+         style="display:inline-block;max-width:320px;width:100%;height:600px"
+         data-ad-client="ca-pub-5105555504153863"
+         data-ad-slot="3646660262"></ins>
+    <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+    -->
+  </div>
+</div>
+
+-->
+  </div>
+  <div id="_yDrawer">
+  <div id="_sidebar" class="sidebar">
+    <div class="sidebar-bg" style="background-color:#4f86aa;background-image:url(/assets/img/nap.jpg)"></div>
+    <header class="sidebar-sticky" role="banner">
+      <br/>
+      <div class="sidebar-about">
+        <h1><a id="_title" href="/">Woongwon Lee</a></h1>
+        <p>Machine Learning Engineer</p>
+
+      </div>
+
+      <br/>
+      <br/>
+      <nav class="sidebar-nav heading" role="navigation">
+        <span class="sr-only">Navigation:</span>
+<ul>
+  
+
+  
+
+  
+  
+  
+  
+  
+    <li>
+      <input type="checkbox" id="list-item-1"/>
+      <div  class="list-wrapper">
+      <a class="sidebar-nav-item" href="/category/paper/">Paper</a>
+       <label class="folder" for="list-item-1">▾</label>
+    </div>
+     <ul class="list-body">
+       
+           
+         
+           
+         
+           
+             <li>
+               <a class="sidebar-nav-subitem" href="/tag/paper-rl/">Reinforcement-Learning</a>
+             </li>
+           
+         
+           
+         
+           
+             <li>
+               <a class="sidebar-nav-subitem" href="/tag/paper-dl/">Deep-Learning</a>
+             </li>
+           
+         
+           
+         
+           
+             <li>
+               <a class="sidebar-nav-subitem" href="/tag/paper-thinking/">Thinking</a>
+             </li>
+           
+         
+     </ul>
+    </li>
+
+  
+  
+    <li>
+      <input type="checkbox" id="list-item-2"/>
+      <div  class="list-wrapper">
+      <a class="sidebar-nav-item" href="/about/">About</a>
+       
+    </div>
+     <ul class="list-body">
+       
+           
+         
+           
+         
+           
+         
+           
+         
+           
+         
+           
+         
+           
+         
+     </ul>
+    </li>
+
+  
+</ul>
+
+      </nav>
+    <br/>
+    <br/>
+      <div class="sidebar-box">
+        
+          
+  
+
+  
+
+  <img
+    src="/assets/img/me.jpeg"
+    class="me"
+    alt="woongwon lee"
+    srcset="/assets/img/me.jpeg 1x,/assets/img/me.jpeg 2x"
+    
+  />
+
+
+        
+      </div>
+      <p>Reinforce Yourself</p>
+
+      
+      
+        <div class="sidebar-social">
+          <span class="sr-only">Social:</span>
+<ul>
+  
+    
+
+
+
+
+
+
+
+
+
+<li>
+  <a href="https://facebook.com/dnddnjs">
+    <span class="icon-facebook" title="Facebook"></span>
+    <span class="sr-only">Facebook</span>
+  </a>
+</li>
+
+  
+    
+
+
+
+
+
+
+
+
+
+<li>
+  <a href="https://github.com/dnddnjs">
+    <span class="icon-github" title="GitHub"></span>
+    <span class="sr-only">GitHub</span>
+  </a>
+</li>
+
+  
+    
+
+
+
+
+
+
+
+
+
+<li>
+  <a href="mailto:dnddnjs11@naver.com">
+    <span class="icon-mail" title="Email"></span>
+    <span class="sr-only">Email</span>
+  </a>
+</li>
+
+  
+</ul>
+
+        </div>
+      
+    </header>
+  </div>
+</div>
+
+</div>
+
+<!-- =============== -->
+<!-- SCRIPTS         -->
+<!-- =============== -->
+
+<script>
+  window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+  ga('create', 'UA-120080215-1', 'auto');
+  ga('send', 'pageview');
+  loadJSDeferred('https://www.google-analytics.com/analytics.js');
+</script>
+
+
+
+
+
+<!--[if gt IE 8]><!---->
+<script src="//ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js"></script>
+<script>
+  WebFont.load({
+    
+    google: {
+      families: 'Lato'.split('|')
+    },
+    
+
+    custom: {
+      families: ['icomoon'],
+      urls: ['/assets/icomoon/style.css']
+    }
+  });
+</script>
+<!--<![endif]-->
+
+
+  <!--[if gt IE 9]><!---->
+  
+  <script>loadJSDeferred('/assets/js/hydejack.js?v=6.4.0');</script>
+
+  
+  <!--<![endif]-->
+
+
+
+</body>
+
+</html>
