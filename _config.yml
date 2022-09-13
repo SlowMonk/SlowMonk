@@ -50,7 +50,7 @@ google_analytics:    UA-120080215-1
 disqus_shortname:    dnddnjs
 
 # This text will appear in the footer of every page. Markdown enabled.
-copyright:           '&copy; 2018. by Woongwon Lee'
+copyright:           '&copy; 2018. by Jake Eum'
 
 # Format of the permalinks
 permalink:           pretty
